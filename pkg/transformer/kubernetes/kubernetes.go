@@ -18,6 +18,7 @@ package kubernetes
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -45,15 +46,16 @@ import (
 
 	"k8s.io/kubernetes/pkg/runtime"
 	"k8s.io/kubernetes/pkg/util/intstr"
-	//"k8s.io/kubernetes/pkg/controller/daemon"
+
 	"sort"
 	"strings"
+
+	"path/filepath"
 
 	"github.com/kubernetes/kompose/pkg/loader/compose"
 	"github.com/pkg/errors"
 	"k8s.io/kubernetes/pkg/api/meta"
 	"k8s.io/kubernetes/pkg/labels"
-	"path/filepath"
 )
 
 // Kubernetes implements Transformer interface and represents Kubernetes transformer
@@ -651,6 +653,7 @@ func (k *Kubernetes) ConfigEmptyVolumeSource(key string) *api.VolumeSource {
 
 // ConfigHostPathVolumeSource is a helper function to create a HostPath api.VolumeSource
 func (k *Kubernetes) ConfigHostPathVolumeSource(path string) (*api.VolumeSource, error) {
+	hostPathRoot := os.Getenv("KOMPOSE_HOSTPATH_ROOT")
 	dir, err := transformer.GetComposeFileDir(k.Opt.InputFiles)
 	version, err := transformer.GetVersionFromFile(k.Opt.InputFiles)
 	if err != nil {
@@ -662,14 +665,14 @@ func (k *Kubernetes) ConfigHostPathVolumeSource(path string) (*api.VolumeSource,
 	// If blank, it's assumed it's 1 or 2
 	case "", "1", "1.0", "2", "2.0":
 		return &api.VolumeSource{
-			HostPath: &api.HostPathVolumeSource{Path: filepath.Join(dir, path)},
+			HostPath: &api.HostPathVolumeSource{Path: filepath.Join(hostPathRoot, dir, path)},
 		}, nil
 	// Again, in v3, we use the "long syntax" for volumes in terms of parsing
 	// https://docs.docker.com/compose/compose-file/#long-syntax-3
 	// So the path is already an absolute path
 	case "3", "3.0", "3.1", "3.2", "3.3":
 		return &api.VolumeSource{
-			HostPath: &api.HostPathVolumeSource{Path: path},
+			HostPath: &api.HostPathVolumeSource{Path: filepath.Join(hostPathRoot, path)},
 		}, nil
 	default:
 		return &api.VolumeSource{}, fmt.Errorf("Version %s of Docker Compose is not supported. Please use version 1, 2 or 3", version)
