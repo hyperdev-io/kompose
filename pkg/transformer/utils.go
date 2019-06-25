@@ -39,7 +39,7 @@ import (
 )
 
 // Selector used as labels and selector
-const Selector = "io.kompose.service"
+const Selector = "io.hyperdev.service"
 
 var StdinData []byte
 
