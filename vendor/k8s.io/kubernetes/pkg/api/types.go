@@ -1285,6 +1285,13 @@ type PodList struct {
 // DNSPolicy defines how a pod's DNS will be configured.
 type DNSPolicy string
 
+// DNSConfig defines what is the DNS configuration of the pod
+// Currently we support only searches
+type DNSConfig struct {
+	Searches    []string `json:"searches"`
+	NameServers []string `json:"nameservers"`
+}
+
 const (
 	// DNSClusterFirst indicates that the pod should use cluster DNS
 	// first, if it is available, then fall back on the default (as
@@ -1568,6 +1575,8 @@ type PodSpec struct {
 	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty"`
 	// Required: Set DNS policy.
 	DNSPolicy DNSPolicy `json:"dnsPolicy,omitempty"`
+	// Pod DNS config
+	DNSConfig DNSConfig `json:"dnsConfig,omitempty"`
 	// NodeSelector is a selector which must be true for the pod to fit on a node
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 

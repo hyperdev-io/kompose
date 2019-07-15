@@ -119,7 +119,15 @@ func (k *Kubernetes) CheckUnsupportedKey(komposeObject *kobject.KomposeObject, u
 
 // InitPodSpec creates the pod specification
 func (k *Kubernetes) InitPodSpec(name string, image string, pullSecret string) api.PodSpec {
+	subdomain := os.Getenv("KOMPOSE_POD_SUBDOMAIN")
 	pod := api.PodSpec{
+		Hostname:  name,
+		Subdomain: subdomain,
+		DNSConfig: api.DNSConfig{
+			Searches: []string{
+				subdomain + "hyperdev.cloud",
+			},
+		},
 		Containers: []api.Container{
 			{
 				Name:  name,
@@ -127,6 +135,7 @@ func (k *Kubernetes) InitPodSpec(name string, image string, pullSecret string) a
 			},
 		},
 	}
+
 	if pullSecret != "" {
 		pod.ImagePullSecrets = []api.LocalObjectReference{
 			{
